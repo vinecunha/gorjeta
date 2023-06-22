@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Slider } from 'primereact/slider';
+import { Button } from 'primereact/button';
+import { Sidebar } from 'primereact/sidebar';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -9,19 +11,25 @@ import './App.css';
 
 const RestaurantBill = () => {
   const [numPeople, setNumPeople] = useState(1);
-  const [billItems, setBillItems] = useState([{ amount: 0 }]);
-  const [tipPercentage, setTipPercentage] = useState(0);
+  const [igualitaria, setIgualitaria] = useState(true);
+  const [billItems, setBillItems] = useState([{ amount: 0, sidebarVisible: false }]);
+  const [tipPercentage, setTipPercentage] = useState(10);
   const [totalBill, setTotalBill] = useState(0);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [sidebarItems, setSidebarItems] = useState([]);
+  const [activeSidebarIndex, setActiveSidebarIndex] = useState(-1);
+
 
   const handleNumPeopleChange = (value) => {
     const num = parseInt(value);
-    setNumPeople(num);
+    setNumPeople(num > 0 ? num : 1);
 
-    // Update the bill items array based on the new number of people
     if (num > billItems.length) {
       const diff = num - billItems.length;
-      const newItems = Array.from({ length: diff }, () => ({ amount: 0 }));
+      const newItems = Array.from({ length: diff }, () => ({
+        amount: 0,
+        sidebarVisible: false,
+      }));
       setBillItems([...billItems, ...newItems]);
     } else if (num < billItems.length) {
       const newItems = billItems.slice(0, num);
@@ -30,43 +38,67 @@ const RestaurantBill = () => {
   };
 
   const handleTipPercentageChange = (value) => {
-    setTipPercentage(parseFloat(value));
+    setTipPercentage(value >= 0 ? parseFloat(value) : 10);
   };
 
   const handleItemAmountChange = (index, value) => {
     const newItems = [...billItems];
-    newItems[index].amount = parseFloat(value);
+    newItems[index] = { ...newItems[index], amount: parseFloat(value) };
     setBillItems(newItems);
+  };  
+
+  const handleSidebarItemChange = (index, value) => {
+    const newSidebarItems = [...sidebarItems];
+    newSidebarItems[index] = parseFloat(value);
+    setSidebarItems(newSidebarItems);
   };
 
   const handleTotalBillChange = (value) => {
-    setTotalBill(parseFloat(value));
+    setTotalBill(value ? parseFloat(value) : 0);
   };
 
-  const calculateTotalBill = () => {
-    let total = 0;
+  const handleAddItem = (index) => {
+    setActiveSidebarIndex(index);
+    const newItems = [...billItems];
+    newItems[index].sidebarVisible = true;
+    setBillItems(newItems);
+    setSidebarItems(newItems[index].sidebarItems || []);
+  };
 
-    if (numPeople === 1) {
-      total = totalBill;
-    } else {
-      billItems.forEach((item) => {
-        total += item.amount;
-      });
-    }
+  const handleAddSidebarItem = () => {
+    setSidebarItems([...sidebarItems, 0]);
+  };
 
-    return total;
+  const handleSidebarAddItem = (index) => {
+    const newBillItems = [...billItems];
+    const sidebarTotal = sidebarItems.reduce((total, item) => total + parseFloat(item), 0);
+  
+    newBillItems[index].amount = sidebarTotal; // Atualize o valor do consumo da pessoa
+    newBillItems[index].sidebarVisible = false;
+    newBillItems[index].sidebarItems = [...sidebarItems]; // Salve o array de itens da sidebar para a pessoa ativa
+    setBillItems(newBillItems);
+    setSidebarItems([]);
+  };
+
+  const handleRemoveSidebarItem = (index) => {
+    const newSidebarItems = [...sidebarItems];
+    newSidebarItems.splice(index, 1);
+    setSidebarItems(newSidebarItems);
   };
 
   const calculateTotalPerPerson = (index) => {
-    const item = billItems[index];
-    const tipAmount = item.amount * (tipPercentage / 100);
-  
-    if (numPeople === 1) {
-      return totalBill + (totalBill*(tipPercentage / 100));
+    if (igualitaria) {
+      const item = billItems[index];
+      const tipAmount = totalBill * (tipPercentage / 100);
+      const totalPerPerson = (totalBill + tipAmount) / numPeople;
+      return totalPerPerson;
     } else {
-      return item.amount + tipAmount;
+      const item = billItems[index];
+      const tipAmount = item.amount * (tipPercentage / 100);
+      const totalPerPerson = item.amount + tipAmount;
+      return totalPerPerson;
     }
-  };  
+  };
 
   useEffect(() => {
     const timerID = setInterval(() => {
@@ -79,47 +111,151 @@ const RestaurantBill = () => {
   }, []);
 
   return (
-    <div className='container-sm bg-white my-5 d-flex flex-column align-items-center'>
+    <div className='container-sm bg-white my-5 py-5 d-flex flex-column align-items-center'>
       <h3>Cálculo de Gorjeta</h3>
       <p className='d-flex flex-row align-items-center'>
         <i className='pi pi-clock mx-1'></i>
         {currentDate.toLocaleString()}
       </p>
-      <span className="p-float-label mt-4">
-        <InputNumber id='pessoas' min={1} value={numPeople} onChange={(e) => handleNumPeopleChange(e.value)} />
-        <label htmlFor="pessoas">Quantas Pessoas?</label>
-      </span>
-      {numPeople > 1 && (
-        <div>
-          {billItems.map((item, index) => (
-            <div key={index} className="p-inputgroup mt-4">
-              <InputNumber value={item.amount} onChange={(e) => handleItemAmountChange(index, e.value)} currency="BRL" locale="pt-BR" />
-            </div>
-          ))}
-        </div>
-      )}
-      {numPeople === 1 && (
-        <span className="p-float-label mt-4">
-          <InputNumber id="total" min={0} value={totalBill} onChange={(e) => handleTotalBillChange(e.value)} currency="BRL" locale="pt-BR" />
-          <label htmlFor="total">Qual o total da conta?</label>
+      <div>
+        <Button
+          label='Divisão igualitária'
+          className={`mx-1 ${igualitaria ? 'p-button-primary' : 'p-button-outlined'}`}
+          onClick={() => setIgualitaria(true)}
+        />
+        <Button
+          label='Divisão por consumo'
+          className={`mx-1 ${!igualitaria ? 'p-button-primary' : 'p-button-outlined'}`}
+          onClick={() => setIgualitaria(false)}
+        />
+      </div>
+      <div className='mt-3 d-flex flex-column justify-content-between align-items-start'>
+        <span className='p-float-label mt-4'>
+          <InputNumber
+            id='pessoas'
+            min={1}
+            value={numPeople}
+            onChange={(e) => handleNumPeopleChange(e.value)}
+          />
+          <label htmlFor='pessoas'>Quantas Pessoas?</label>
         </span>
-      )}
-      {numPeople > 1 && (
-        <span className="p-float-label mt-4">
-          <InputNumber id="total" min={0} value={calculateTotalBill()} disabled currency="BRL" locale="pt-BR" />
-          <label htmlFor="total">Qual o total da conta?</label>
+        {igualitaria ? (
+          <>
+            <span className='p-float-label mt-4'>
+              <InputNumber
+                id='total'
+                min={0}
+                value={totalBill}
+                onChange={(e) => handleTotalBillChange(e.value)}
+                mode="currency"
+                currency='BRL'
+                locale='pt-BR'
+              />
+              <label htmlFor='total'>Qual o total da conta?</label>
+            </span>
+          </>
+        ) : (
+          numPeople >= 1 && (
+            <>
+              {billItems.map((item, index) => (
+                <div className='d-flex flex-row justify-content-between align-items-start' key={index}>
+                  <span className='p-float-label mt-4'>
+                    <InputNumber
+                      value={item.amount}
+                      onChange={(e) => handleItemAmountChange(index, e.value)}
+                      mode="currency"
+                      currency='BRL'
+                      locale='pt-BR'
+                      disabled
+                    />
+                    <label htmlFor='total'>{`Qual o total da pessoa ${index + 1}?`}</label>
+                    <Button
+                      icon='pi pi-pencil'
+                      className='mx-1'
+                      onClick={() => handleAddItem(index)}
+                    />
+                  </span>
+                  <Sidebar
+                    visible={item.sidebarVisible}
+                    onHide={() => {
+                      const newItems = [...billItems];
+                      newItems[index].sidebarVisible = false;
+                      setBillItems(newItems);
+                      setSidebarItems([]);
+                    }}
+                  >
+                    <div className='p-fluid'>
+                      <h5>Relacionar Itens consumidos</h5>
+                      <Button
+                        label="Adicionar item"
+                        icon="pi pi-plus"
+                        className='mt-5'
+                        text
+                        severity='primary'
+                        onClick={handleAddSidebarItem}
+                      />
+                      {index === activeSidebarIndex && sidebarItems.length > 0 && (
+                        <>
+                          <h5 className="mt-5">Sidebar Items:</h5>
+                          {sidebarItems.map((sidebarItem, sidebarIndex) => (
+                            <div key={sidebarIndex} className='p-field d-flex flex-row justify-content-between align-items-end'>
+                              <div>
+                                <label htmlFor={`sidebarItem${sidebarIndex}`}>Valor:</label>
+                                <InputNumber
+                                  id={`sidebarItem${sidebarIndex}`}
+                                  value={sidebarItem}
+                                  onChange={(e) => handleSidebarItemChange(sidebarIndex, e.value)}
+                                  mode="currency"
+                                  currency='BRL'
+                                  locale='pt-BR'
+                                />
+                              </div>
+                              <Button
+                                icon='pi pi-trash'
+                                className='mx-1'
+                                severity='danger'
+                                text
+                                onClick={() => handleRemoveSidebarItem(sidebarIndex)}
+                              />
+                            </div>
+                          ))}
+                          <Button
+                            label='Finalizar consumo'
+                            className='p-button-success mt-5'
+                            onClick={() => handleSidebarAddItem(index)}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </Sidebar>
+
+                </div>
+              ))}
+            </>
+          )
+        )}
+
+        <span className='p-float-label mt-4'>
+          <InputText
+            value={tipPercentage}
+            onChange={(e) => handleTipPercentageChange(e.target.value)}
+          />
+          <Slider
+            value={tipPercentage}
+            onChange={(e) => handleTipPercentageChange(e.value)}
+            min={0}
+            max={100}
+          />
+          <label htmlFor='gorjeta'>% de Gorjeta</label>
         </span>
-      )}
-      <span className="p-float-label mt-4">
-        <InputText value={tipPercentage} onChange={(e) => handleTipPercentageChange(e.target.value)} />
-        <Slider value={tipPercentage} onChange={(e) => handleTipPercentageChange(e.value)} />
-        <label htmlFor="gorjeta">% de Gorjeta</label>
-      </span>
+      </div>
 
       <h3 className='mt-5'>Total por pessoa:</h3>
       <ul>
         {billItems.map((item, index) => (
-          <li key={index}>{`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(index).toFixed(2)}`}</li>
+          <li key={index}>{`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(
+            index
+          ).toFixed(2)}`}</li>
         ))}
       </ul>
     </div>
