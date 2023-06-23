@@ -111,7 +111,7 @@ const RestaurantBill = () => {
   }, []);
 
   return (
-    <div style={{maxWidth: '540px'}}className='container-sm bg-white rounded my-5 py-5 d-flex flex-column align-items-center'>
+    <div style={{maxWidth: '400px'}}className='container-sm bg-white rounded my-5 py-5 d-flex flex-column align-items-center'>
       <h3>SplitBill+</h3>
       <p className='d-flex flex-row align-items-center'>
         <i className='pi pi-clock mx-1'></i>
