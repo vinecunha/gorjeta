@@ -27,3 +27,5 @@ SplitBill+ é uma aplicação simples desenvolvida em React que ajuda a dividir 
 ## Contribuição
 
 Contribuições para o aprimoramento do SplitBill+ são bem-vindas. Se você encontrar algum problema, tiver uma ideia de melhoria ou desejar adicionar uma nova funcionalidade, sinta-se à vontade para criar uma issue ou enviar um pull request.
+
+Você pode acessar o projeto em: https://vinecunha-gorjeta.netlify.app
