@@ -9,100 +9,102 @@ import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 import './App.css';
 
-const RestaurantBill = () => {
-  const [numPeople, setNumPeople] = useState(1);
+const ContaRestaurante = () => {
+  const [numPessoas, setNumPessoas] = useState(1);
   const [igualitaria, setIgualitaria] = useState(true);
-  const [billItems, setBillItems] = useState([{ amount: 0, sidebarVisible: false }]);
-  const [tipPercentage, setTipPercentage] = useState(10);
-  const [totalBill, setTotalBill] = useState(0);
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [sidebarItems, setSidebarItems] = useState([]);
-  const [activeSidebarIndex, setActiveSidebarIndex] = useState(-1);
+  const [itensConta, setItensConta] = useState([{ valor: 0, sidebarVisivel: false }]);
+  const [porcentagemGorjeta, setPorcentagemGorjeta] = useState(10);
+  const [totalConta, setTotalConta] = useState(0);
+  const [dataAtual, setDataAtual] = useState(new Date());
+  const [itensSidebar, setItensSidebar] = useState([]);
+  const [indexSidebarAtivo, setindexSidebarAtivo] = useState(-1);
 
 
-  const handleNumPeopleChange = (value) => {
-    const num = parseInt(value);
-    setNumPeople(num > 0 ? num : 1);
+  const handleNumPessoasChange = (valor) => {
+    const num = parseInt(valor);
+    setNumPessoas(num > 0 ? num : 1);
 
-    if (num > billItems.length) {
-      const diff = num - billItems.length;
-      const newItems = Array.from({ length: diff }, () => ({
-        amount: 0,
-        sidebarVisible: false,
+    if (num > itensConta.length) {
+      const diferenca = num - itensConta.length;
+      const novosItens = Array.from({ length: diferenca }, () => ({
+        valor: 0,
+        sidebarVisivel: false,
       }));
-      setBillItems([...billItems, ...newItems]);
-    } else if (num < billItems.length) {
-      const newItems = billItems.slice(0, num);
-      setBillItems(newItems);
+      setItensConta([...itensConta, ...novosItens]);
+    } else if (num < itensConta.length) {
+      const novosItens = itensConta.slice(0, num);
+      setItensConta(novosItens);
     }
   };
 
-  const handleTipPercentageChange = (value) => {
-    setTipPercentage(value >= 0 ? parseFloat(value) : 10);
+  const handlePorcentagemGorjetaChange = (valor) => {
+    setPorcentagemGorjeta(valor >= 0 ? parseFloat(valor) : 10);
   };
 
-  const handleItemAmountChange = (index, value) => {
-    const newItems = [...billItems];
-    newItems[index] = { ...newItems[index], amount: parseFloat(value) };
-    setBillItems(newItems);
+  const handleValorItemChange = (index, valor) => {
+    const novosItens = [...itensConta];
+    novosItens[index] = { ...novosItens[index], valor: parseFloat(valor) };
+    setItensConta(novosItens);
   };  
 
-  const handleSidebarItemChange = (index, value) => {
-    const newSidebarItems = [...sidebarItems];
-    newSidebarItems[index] = parseFloat(value);
-    setSidebarItems(newSidebarItems);
+  const handleItensSidebarChange = (index, valor) => {
+    const novosItensSidebar = [...itensSidebar];
+    novosItensSidebar[index] = parseFloat(valor);
+    setItensSidebar(novosItensSidebar);
   };
 
-  const handleTotalBillChange = (value) => {
-    setTotalBill(value ? parseFloat(value) : 0);
+  const handleTotalContaChange = (valor) => {
+    setTotalConta(valor ? parseFloat(valor) : 0);
   };
 
-  const handleAddItem = (index) => {
-    setActiveSidebarIndex(index);
-    const newItems = [...billItems];
-    newItems[index].sidebarVisible = true;
-    setBillItems(newItems);
-    setSidebarItems(newItems[index].sidebarItems || []);
+  const handleAdicionarItem = (index) => {
+    setindexSidebarAtivo(index);
+    const novosItens = [...itensConta];
+    novosItens[index].sidebarVisivel = true;
+    setItensConta(novosItens);
+    setItensSidebar(novosItens[index].itensSidebar || []);
   };
 
-  const handleAddSidebarItem = () => {
-    setSidebarItems([...sidebarItems, 0]);
+  const handleAdicionarItemSidebar = () => {
+    setItensSidebar([...itensSidebar, 0]);
   };
 
-  const handleSidebarAddItem = (index) => {
-    const newBillItems = [...billItems];
-    const sidebarTotal = sidebarItems.reduce((total, item) => total + parseFloat(item), 0);
+  const handleSidebarAdicionarItem = (index) => {
+    const novosItensConta = [...itensConta];
+    const totalSidebar = itensSidebar.reduce((total, item) => total + parseFloat(item), 0);
   
-    newBillItems[index].amount = sidebarTotal; // Atualize o valor do consumo da pessoa
-    newBillItems[index].sidebarVisible = false;
-    newBillItems[index].sidebarItems = [...sidebarItems]; // Salve o array de itens da sidebar para a pessoa ativa
-    setBillItems(newBillItems);
-    setSidebarItems([]);
+    novosItensConta
+
+[index].valor = totalSidebar;
+    novosItensConta[index].sidebarVisivel = false;
+    novosItensConta[index].itensSidebar = [...itensSidebar];
+    setItensConta(novosItensConta);
+    setItensSidebar([]);
   };
 
-  const handleRemoveSidebarItem = (index) => {
-    const newSidebarItems = [...sidebarItems];
-    newSidebarItems.splice(index, 1);
-    setSidebarItems(newSidebarItems);
+  const handleRemoverItemSidebar = (index) => {
+    const novosItensSidebar = [...itensSidebar];
+    novosItensSidebar.splice(index, 1);
+    setItensSidebar(novosItensSidebar);
   };
 
-  const calculateTotalPerPerson = (index) => {
+  const calcularTotalPorPessoa = (index) => {
     if (igualitaria) {
-      const item = billItems[index];
-      const tipAmount = totalBill * (tipPercentage / 100);
-      const totalPerPerson = (totalBill + tipAmount) / numPeople;
-      return totalPerPerson;
+      const item = itensConta[index];
+      const valorGorjeta = totalConta * (porcentagemGorjeta / 100);
+      const totalPorPessoa = (totalConta + valorGorjeta) / numPessoas;
+      return totalPorPessoa;
     } else {
-      const item = billItems[index];
-      const tipAmount = item.amount * (tipPercentage / 100);
-      const totalPerPerson = item.amount + tipAmount;
-      return totalPerPerson;
+      const item = itensConta[index];
+      const valorGorjeta = item.valor * (porcentagemGorjeta / 100);
+      const totalPorPessoa = item.valor + valorGorjeta;
+      return totalPorPessoa;
     }
   };
 
   useEffect(() => {
     const timerID = setInterval(() => {
-      setCurrentDate(new Date());
+      setDataAtual(new Date());
     }, 1000);
 
     return () => {
@@ -111,11 +113,11 @@ const RestaurantBill = () => {
   }, []);
 
   return (
-    <div className='container-sm bg-white my-5 py-5 d-flex flex-column align-items-center'>
-      <h3>Cálculo de Gorjeta</h3>
+    <div style={{maxWidth: '540px'}}className='container-sm bg-white rounded my-5 py-5 d-flex flex-column align-items-center'>
+      <h3>SplitBill+</h3>
       <p className='d-flex flex-row align-items-center'>
         <i className='pi pi-clock mx-1'></i>
-        {currentDate.toLocaleString()}
+        {dataAtual.toLocaleString()}
       </p>
       <div>
         <Button
@@ -134,8 +136,8 @@ const RestaurantBill = () => {
           <InputNumber
             id='pessoas'
             min={1}
-            value={numPeople}
-            onChange={(e) => handleNumPeopleChange(e.value)}
+            value={numPessoas}
+            onChange={(e) => handleNumPessoasChange(e.value)}
           />
           <label htmlFor='pessoas'>Quantas Pessoas?</label>
         </span>
@@ -145,8 +147,8 @@ const RestaurantBill = () => {
               <InputNumber
                 id='total'
                 min={0}
-                value={totalBill}
-                onChange={(e) => handleTotalBillChange(e.value)}
+                value={totalConta}
+                onChange={(e) => handleTotalContaChange(e.value)}
                 mode="currency"
                 currency='BRL'
                 locale='pt-BR'
@@ -155,14 +157,14 @@ const RestaurantBill = () => {
             </span>
           </>
         ) : (
-          numPeople >= 1 && (
+          numPessoas >= 1 && (
             <>
-              {billItems.map((item, index) => (
+              {itensConta.map((item, index) => (
                 <div className='d-flex flex-row justify-content-between align-items-start' key={index}>
                   <span className='p-float-label mt-4'>
                     <InputNumber
-                      value={item.amount}
-                      onChange={(e) => handleItemAmountChange(index, e.value)}
+                      value={item.valor}
+                      onChange={(e) => handleValorItemChange(index, e.value)}
                       mode="currency"
                       currency='BRL'
                       locale='pt-BR'
@@ -172,16 +174,16 @@ const RestaurantBill = () => {
                     <Button
                       icon='pi pi-pencil'
                       className='mx-1'
-                      onClick={() => handleAddItem(index)}
+                      onClick={() => handleAdicionarItem(index)}
                     />
                   </span>
                   <Sidebar
-                    visible={item.sidebarVisible}
+                    visible={item.sidebarVisivel}
                     onHide={() => {
-                      const newItems = [...billItems];
-                      newItems[index].sidebarVisible = false;
-                      setBillItems(newItems);
-                      setSidebarItems([]);
+                      const novosItens = [...itensConta];
+                      novosItens[index].sidebarVisivel = false;
+                      setItensConta(novosItens);
+                      setItensSidebar([]);
                     }}
                   >
                     <div className='p-fluid'>
@@ -192,19 +194,19 @@ const RestaurantBill = () => {
                         className='mt-5'
                         text
                         severity='primary'
-                        onClick={handleAddSidebarItem}
+                        onClick={handleAdicionarItemSidebar}
                       />
-                      {index === activeSidebarIndex && sidebarItems.length > 0 && (
+                      {index === indexSidebarAtiva && itensSidebar.length > 0 && (
                         <>
-                          <h5 className="mt-5">Sidebar Items:</h5>
-                          {sidebarItems.map((sidebarItem, sidebarIndex) => (
-                            <div key={sidebarIndex} className='p-field d-flex flex-row justify-content-between align-items-end'>
+                          <h5 className="mt-5">Itens da Barra Lateral:</h5>
+                          {itensSidebar.map((itemSidebar, indexSidebar) => (
+                            <div key={indexSidebar} className='p-field d-flex flex-row justify-content-between align-items-end'>
                               <div>
-                                <label htmlFor={`sidebarItem${sidebarIndex}`}>Valor:</label>
+                                <label htmlFor={`itemSidebar${indexSidebar}`}>Valor:</label>
                                 <InputNumber
-                                  id={`sidebarItem${sidebarIndex}`}
-                                  value={sidebarItem}
-                                  onChange={(e) => handleSidebarItemChange(sidebarIndex, e.value)}
+                                  id={`itemSidebar${indexSidebar}`}
+                                  value={itemSidebar}
+                                  onChange={(e) => handleValorItemSidebarChange(indexSidebar, e.value)}
                                   mode="currency"
                                   currency='BRL'
                                   locale='pt-BR'
@@ -215,14 +217,14 @@ const RestaurantBill = () => {
                                 className='mx-1'
                                 severity='danger'
                                 text
-                                onClick={() => handleRemoveSidebarItem(sidebarIndex)}
+                                onClick={() => handleRemoverItemSidebar(indexSidebar)}
                               />
                             </div>
                           ))}
                           <Button
                             label='Finalizar consumo'
                             className='p-button-success mt-5'
-                            onClick={() => handleSidebarAddItem(index)}
+                            onClick={() => handleAdicionarItemSidebar(index)}
                           />
                         </>
                       )}
@@ -237,12 +239,12 @@ const RestaurantBill = () => {
 
         <span className='p-float-label mt-4'>
           <InputText
-            value={tipPercentage}
-            onChange={(e) => handleTipPercentageChange(e.target.value)}
+            value={porcentagemGorjeta}
+            onChange={(e) => handlePorcentagemGorjetaChange(e.target.value)}
           />
           <Slider
-            value={tipPercentage}
-            onChange={(e) => handleTipPercentageChange(e.value)}
+            value={porcentagemGorjeta}
+            onChange={(e) => handlePorcentagemGorjetaChange(e.value)}
             min={0}
             max={100}
           />
@@ -252,14 +254,12 @@ const RestaurantBill = () => {
 
       <h3 className='mt-5'>Total por pessoa:</h3>
       <ul>
-        {billItems.map((item, index) => (
-          <li key={index}>{`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(
-            index
-          ).toFixed(2)}`}</li>
+        {itensConta.map((item, index) => (
+          <li key={index}>{`Pessoa ${index + 1}: R$ ${calcularTotalPorPessoa(index).toFixed(2)}`}</li>
         ))}
       </ul>
     </div>
   );
 };
 
-export default RestaurantBill;
+export default ContaRestaurante;
