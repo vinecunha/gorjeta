@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Slider } from 'primereact/slider';
 import { Button } from 'primereact/button';
 import { Sidebar } from 'primereact/sidebar';
+import { Divider } from 'primereact/divider';
+import { Toast } from 'primereact/toast';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -18,7 +20,7 @@ const RestaurantBill = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [sidebarItems, setSidebarItems] = useState([]);
   const [activeSidebarIndex, setActiveSidebarIndex] = useState(-1);
-
+  const toast = useRef(null);
 
   const handleNumPeopleChange = (value) => {
     const num = parseInt(value);
@@ -72,6 +74,8 @@ const RestaurantBill = () => {
   const handleSidebarAddItem = (index) => {
     const newBillItems = [...billItems];
     const sidebarTotal = sidebarItems.reduce((total, item) => total + parseFloat(item), 0);
+
+    toast.current.show({ severity: 'success', summary: 'Sucesso!', detail: 'Consumo atualizado com sucesso!', life: 3000 });
   
     newBillItems[index].amount = sidebarTotal; // Atualize o valor do consumo da pessoa
     newBillItems[index].sidebarVisible = false;
@@ -117,13 +121,13 @@ const RestaurantBill = () => {
   }, []);
 
   return (
-    <div style={{maxWidth: '380px'}}className='container-sm bg-white rounded my-5 py-5 d-flex flex-column align-items-center'>
+    <div style={{maxWidth: '90vw'}}className='mx-auto bg-white rounded my-5 pt-5 pb-1 d-flex flex-column align-items-center'>
       <h3>SplitBill+</h3>
       <p className='d-flex flex-row align-items-center'>
         <i className='pi pi-clock mx-1'></i>
         {currentDate.toLocaleString()}
       </p>
-      <div className='d-flex flex-row align-items-center'>
+      <div className='d-flex flex-row justify-content-center align-items-center'>
         <Button
           label='Igualitária'
           className={`mx-1 ${igualitaria ? 'p-button-primary' : 'p-button-outlined'}`}
@@ -202,7 +206,7 @@ const RestaurantBill = () => {
                       />
                       {index === activeSidebarIndex && sidebarItems.length > 0 && (
                         <>
-                          <h5 className="mt-5">Sidebar Items:</h5>
+                          <h5 className="mt-5">Consumo da pessoa {index+1}:</h5>
                           {sidebarItems.map((sidebarItem, sidebarIndex) => (
                             <div key={sidebarIndex} className='p-field d-flex flex-row justify-content-between align-items-end'>
                               <div>
@@ -227,16 +231,16 @@ const RestaurantBill = () => {
                               />
                             </div>
                           ))}
-                          <Button
+                        </>
+                      )}
+                      <Button
                             label='Finalizar consumo'
                             className='p-button-success mt-5'
                             onClick={() => handleSidebarAddItem(index)}
-                          />
-                        </>
-                      )}
+                      />
                     </div>
                   </Sidebar>
-
+                  <Toast ref={toast} />
                 </div>
               ))}
             </>
@@ -261,11 +265,14 @@ const RestaurantBill = () => {
       <h3 className='mt-5'>Total por pessoa:</h3>
       <ul>
         {billItems.map((item, index) => (
-          <li key={index}>{`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(
-            index
-          ).toFixed(2)}`}</li>
+          <><li key={index} style={{listStyle: 'none'}}>
+            {`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(index).toFixed(2)}`}
+          </li>
+          </>
         ))}
       </ul>
+      <Divider />
+      <p style={{fontSize: '.8rem'}} className='position-relative bottom-0 text-secondary'>Versão: 1.0.0.2</p>
     </div>
   );
 };
