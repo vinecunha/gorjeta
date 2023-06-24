@@ -130,12 +130,12 @@ const RestaurantBill = () => {
       <div className='d-flex flex-row justify-content-center align-items-center'>
         <Button
           label='Igualitária'
-          className={`mx-1 ${igualitaria ? 'p-button-primary' : 'p-button-outlined'}`}
+          className={`mx-1 ${igualitaria ? 'p-button-primary' : 'p-button-text'}`}
           onClick={() => setIgualitaria(true)}
         />
         <Button
           label='Por consumo'
-          className={`mx-1 ${!igualitaria ? 'p-button-primary' : 'p-button-outlined'}`}
+          className={`mx-1 ${!igualitaria ? 'p-button-primary' : 'p-button-text'}`}
           onClick={() => setIgualitaria(false)}
         />
       </div>
