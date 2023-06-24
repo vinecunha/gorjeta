@@ -14,7 +14,7 @@ const RestaurantBill = () => {
   const [igualitaria, setIgualitaria] = useState(true);
   const [billItems, setBillItems] = useState([{ amount: 0, sidebarVisible: false }]);
   const [tipPercentage, setTipPercentage] = useState(10);
-  const [totalBill, setTotalBill] = useState(0);
+  const [totalBill, setTotalBill] = useState('');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [sidebarItems, setSidebarItems] = useState([]);
   const [activeSidebarIndex, setActiveSidebarIndex] = useState(-1);
@@ -86,6 +86,12 @@ const RestaurantBill = () => {
     setSidebarItems(newSidebarItems);
   };
 
+  const handleTotalBillClick = () => {
+    if (totalBill === null || totalBill === 0) {
+      setTotalBill('');
+    }
+  };
+
   const calculateTotalPerPerson = (index) => {
     if (igualitaria) {
       const item = billItems[index];
@@ -111,20 +117,20 @@ const RestaurantBill = () => {
   }, []);
 
   return (
-    <div style={{maxWidth: '400px'}}className='container-sm bg-white rounded my-5 py-5 d-flex flex-column align-items-center'>
+    <div style={{maxWidth: '380px'}}className='container-sm bg-white rounded my-5 py-5 d-flex flex-column align-items-center'>
       <h3>SplitBill+</h3>
       <p className='d-flex flex-row align-items-center'>
         <i className='pi pi-clock mx-1'></i>
         {currentDate.toLocaleString()}
       </p>
-      <div>
+      <div className='d-flex flex-row align-items-center'>
         <Button
-          label='Divisão igualitária'
+          label='Igualitária'
           className={`mx-1 ${igualitaria ? 'p-button-primary' : 'p-button-outlined'}`}
           onClick={() => setIgualitaria(true)}
         />
         <Button
-          label='Divisão por consumo'
+          label='Por consumo'
           className={`mx-1 ${!igualitaria ? 'p-button-primary' : 'p-button-outlined'}`}
           onClick={() => setIgualitaria(false)}
         />
@@ -135,6 +141,7 @@ const RestaurantBill = () => {
             id='pessoas'
             min={1}
             value={numPeople}
+            showButtons
             onChange={(e) => handleNumPeopleChange(e.value)}
           />
           <label htmlFor='pessoas'>Quantas Pessoas?</label>
@@ -146,10 +153,11 @@ const RestaurantBill = () => {
                 id='total'
                 min={0}
                 value={totalBill}
+                onFocus={handleTotalBillClick}
+                onClick={handleTotalBillClick}
                 onChange={(e) => handleTotalBillChange(e.value)}
-                mode="currency"
-                currency='BRL'
-                locale='pt-BR'
+                minFractionDigits={2}
+                prefix='R$ '
               />
               <label htmlFor='total'>Qual o total da conta?</label>
             </span>
@@ -163,15 +171,13 @@ const RestaurantBill = () => {
                     <InputNumber
                       value={item.amount}
                       onChange={(e) => handleItemAmountChange(index, e.value)}
-                      mode="currency"
-                      currency='BRL'
-                      locale='pt-BR'
+                      minFractionDigits={2}
+                      prefix='R$ '
                       disabled
                     />
                     <label htmlFor='total'>{`Qual o total da pessoa ${index + 1}?`}</label>
                     <Button
                       icon='pi pi-pencil'
-                      className='mx-1'
                       onClick={() => handleAddItem(index)}
                     />
                   </span>
@@ -203,11 +209,13 @@ const RestaurantBill = () => {
                                 <label htmlFor={`sidebarItem${sidebarIndex}`}>Valor:</label>
                                 <InputNumber
                                   id={`sidebarItem${sidebarIndex}`}
+                                  min={0}
                                   value={sidebarItem}
                                   onChange={(e) => handleSidebarItemChange(sidebarIndex, e.value)}
-                                  mode="currency"
-                                  currency='BRL'
-                                  locale='pt-BR'
+                                  onFocus={handleSidebarItemChange}
+                                  onClick={handleSidebarItemChange}
+                                  minFractionDigits={2}
+                                  prefix='R$ '
                                 />
                               </div>
                               <Button
