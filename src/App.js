@@ -6,6 +6,7 @@ import { Button } from 'primereact/button';
 import { Sidebar } from 'primereact/sidebar';
 import { Divider } from 'primereact/divider';
 import { Toast } from 'primereact/toast';
+import { Fieldset } from 'primereact/fieldset';
 import 'primereact/resources/themes/saga-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
@@ -109,6 +110,13 @@ const RestaurantBill = () => {
       return totalPerPerson;
     }
   };
+
+  const legendTemplate = (
+    <div className="flex align-items-center text-secondary">
+        <span className="pi pi-list mx-2"></span>
+        <span className="font-bold text-lg">Total por Pessoa</span>
+    </div>
+);
 
   useEffect(() => {
     const timerID = setInterval(() => {
@@ -261,16 +269,17 @@ const RestaurantBill = () => {
           <label htmlFor='gorjeta'>% de Gorjeta</label>
         </span>
       </div>
-
-      <h3 className='mt-5'>Total por pessoa:</h3>
-      <ul>
-        {billItems.map((item, index) => (
-          <><li key={index} style={{listStyle: 'none'}}>
-            {`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(index).toFixed(2)}`}
-          </li>
-          </>
-        ))}
-      </ul>
+      
+      <Fieldset legend={legendTemplate} className='mt-5' toggleable>
+        <ul>
+          {billItems.map((item, index) => (
+            <><li key={index} style={{listStyle: 'none'}}>
+              {`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(index).toFixed(2)}`}
+            </li>
+            </>
+          ))}
+        </ul>
+      </Fieldset>
       <Divider />
       <p style={{fontSize: '.8rem'}} className='position-relative bottom-0 text-secondary'>Versão: 1.0.0.2</p>
     </div>
