@@ -270,9 +270,9 @@ const RestaurantBill = () => {
       </div>
       
       <Fieldset legend={legendTemplate} className='mt-5 border-0' toggleable>
-        <ul>
+        <ul className='container-fluid'>
           {billItems.map((item, index) => (
-            <><li key={index} style={{listStyle: 'none'}}>
+            <><li key={index} className='w-100 pb-2 mt-2 border-1 border-bottom' style={{listStyle: 'none'}}>
               {<span className="pi pi-user mx-2"></span>}{`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(index).toFixed(2)}`}
             </li>
             </>
