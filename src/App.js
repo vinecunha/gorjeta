@@ -112,9 +112,8 @@ const RestaurantBill = () => {
   };
 
   const legendTemplate = (
-    <div className="flex align-items-center text-secondary">
-        <span className="pi pi-list mx-2"></span>
-        <span className="font-bold text-lg">Total por Pessoa</span>
+    <div className="container-fluid d-flex flex-row align-items-center text-secondary">
+        <span style={{fontSize: '1rem'}} className="font-bold m-0">Total por Pessoa</span>
     </div>
 );
 
@@ -270,11 +269,11 @@ const RestaurantBill = () => {
         </span>
       </div>
       
-      <Fieldset legend={legendTemplate} className='mt-5' toggleable>
+      <Fieldset legend={legendTemplate} className='mt-5 border-0' toggleable>
         <ul>
           {billItems.map((item, index) => (
             <><li key={index} style={{listStyle: 'none'}}>
-              {`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(index).toFixed(2)}`}
+              {<span className="pi pi-user mx-2"></span>}{`Pessoa ${index + 1}: R$ ${calculateTotalPerPerson(index).toFixed(2)}`}
             </li>
             </>
           ))}
